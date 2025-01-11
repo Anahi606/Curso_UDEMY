@@ -5,6 +5,8 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private CharacterController controller;
+    private Animator animator;
+    private AudioSource audioSource;
     private Vector3 playerVelocity;
     private bool groundedPlayer;
     [SerializeField]
@@ -13,11 +15,17 @@ public class Player : MonoBehaviour
     private float _runSpeed = 4.0f;
     private float jumpHeight = 1.0f;
     private float _gravity = -9.81f;
+    [SerializeField]
+    private AudioClip walkClip;
+    [SerializeField]
+    private AudioClip runClip;
 
     // Start is called before the first frame update
     private void Start()
     {
         controller = gameObject.AddComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -47,5 +55,29 @@ public class Player : MonoBehaviour
 
         playerVelocity.y += _gravity * Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
+
+        animator.SetFloat("Speed", move.magnitude * currentSpeed);
+        animator.SetBool("IsRunning", Input.GetKey(KeyCode.LeftShift));
+
+        HandleFootstepSounds(move.magnitude, currentSpeed);
+    }
+
+    private void HandleFootstepSounds(float movementMagnitude, float currentSpeed)
+    {
+        if (movementMagnitude > 0.1f && groundedPlayer)
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.clip = Input.GetKey(KeyCode.LeftShift) ? runClip : walkClip;
+                audioSource.Play();
+            }
+        }
+        else
+        {
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+        }
     }
 }
