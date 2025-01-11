@@ -20,12 +20,17 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip runClip;
 
-    // Start is called before the first frame update
     private void Start()
     {
         controller = gameObject.AddComponent<CharacterController>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.volume = 1.0f;
+        audioSource.spatialBlend = 0f;
     }
 
     void Update()
@@ -66,9 +71,11 @@ public class Player : MonoBehaviour
     {
         if (movementMagnitude > 0.1f && groundedPlayer)
         {
-            if (!audioSource.isPlaying)
+            AudioClip currentClip = Input.GetKey(KeyCode.LeftShift) ? runClip : walkClip;
+
+            if (audioSource.clip != currentClip)
             {
-                audioSource.clip = Input.GetKey(KeyCode.LeftShift) ? runClip : walkClip;
+                audioSource.clip = currentClip;
                 audioSource.Play();
             }
         }
